@@ -772,7 +772,9 @@ class MeetingNotesApp(App):
             transcripts_dir=self.config.transcripts_dir,
             ai_provider=self.config.ai_provider,
             ai_model=self.config.ai_model,
-            api_key=api_key
+            api_key=api_key,
+            vectyr_sync_url=self.config.vectyr_sync_url,
+            vectyr_sync_token=self.config.vectyr_sync_token,
         )
         self.notes_dir = Path(self.config.notes_dir).expanduser()
         self.notes_dir.mkdir(parents=True, exist_ok=True)
@@ -2012,6 +2014,7 @@ class MeetingNotesApp(App):
         """Handle settings screen closing."""
         if new_config:
             # Settings were saved, reload config and components
+            self.note_maker.close()
             self.config = new_config
             
             # Reinitialize components with new config
@@ -2034,7 +2037,9 @@ class MeetingNotesApp(App):
                 transcripts_dir=self.config.transcripts_dir,
                 ai_provider=self.config.ai_provider,
                 ai_model=self.config.ai_model,
-                api_key=api_key
+                api_key=api_key,
+                vectyr_sync_url=self.config.vectyr_sync_url,
+                vectyr_sync_token=self.config.vectyr_sync_token,
             )
             self.notes_dir = Path(self.config.notes_dir).expanduser()
             self.notes_dir.mkdir(parents=True, exist_ok=True)

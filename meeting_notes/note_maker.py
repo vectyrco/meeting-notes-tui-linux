@@ -7,6 +7,7 @@ from collections import Counter
 import re
 
 from .logger import get_logger
+from .vectyr_sync import VectyrSync
 
 logger = get_logger(__name__)
 
@@ -34,7 +35,9 @@ class NoteMaker:
         transcripts_dir: str = "transcripts",
         ai_provider: str = "none",  # "cloud", "local", or "none"
         ai_model: str = "balanced",  # For cloud: tier, for local: ollama model
-        api_key: Optional[str] = None
+        api_key: Optional[str] = None,
+        vectyr_sync_url: str = "",
+        vectyr_sync_token: str = ""
     ):
         """
         Initialize note maker.
@@ -51,6 +54,10 @@ class NoteMaker:
         self.transcripts_dir = Path(transcripts_dir).expanduser()
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.transcripts_dir.mkdir(parents=True, exist_ok=True)
+        self.vectyr_sync: Optional[VectyrSync] = None
+        if vectyr_sync_url:
+            self.vectyr_sync = VectyrSync(self.transcripts_dir, vectyr_sync_url, vectyr_sync_token)
+            self.vectyr_sync.start()
         self.ai_provider = ai_provider
         self.summarizer: Optional[Any] = None
         
@@ -202,6 +209,11 @@ class NoteMaker:
         logger.info(f"Note saved: {note_path}")
         
         return str(note_path), str(transcript_path), ai_error
+
+    def close(self) -> None:
+        """Stop the background sync worker when settings rebuild this object."""
+        if self.vectyr_sync:
+            self.vectyr_sync.stop()
     
     def _extract_simple_summary(self, text: str) -> dict:
         """Extract basic summary information without LLM.

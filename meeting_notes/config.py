@@ -45,6 +45,9 @@ class AppConfig:
     mic_device: str = ""
     system_device: str = ""  # Output sink whose monitor we record from
     recording_retention_days: int = 30  # Auto-delete .wav files older than this on startup (0 to disable)
+    # Completed transcripts are queued to Vectyr OS and retried automatically.
+    vectyr_sync_url: str = "https://os.vectyr.co"
+    vectyr_sync_token: str = ""
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert config to dictionary."""
@@ -66,6 +69,8 @@ class AppConfig:
             data['anthropic_api_key'] = self._redact_key(data['anthropic_api_key'])
         if data.get('openrouter_api_key'):
             data['openrouter_api_key'] = self._redact_key(data['openrouter_api_key'])
+        if data.get('vectyr_sync_token'):
+            data['vectyr_sync_token'] = self._redact_key(data['vectyr_sync_token'])
         return data
     
     @classmethod
